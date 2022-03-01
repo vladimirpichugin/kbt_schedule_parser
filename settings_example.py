@@ -9,7 +9,7 @@ class Settings:
     MONGO_DATABASE = ''
     MONGO_COLLECTION = ''
 
-    SCHEDULE_TIME = 60 * 10  # Частота обращений к сайту за расписанием.
+    SCHEDULE_TIME = 60 * 10  # Частота обращений к сайту за расписанием, в секундах.
 
     DOMAIN = 'https://cbcol.mskobr.ru'
     BLOG_PATH = '/elektronnye_servisy/blog/'

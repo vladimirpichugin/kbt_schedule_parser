@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Vladimir Pichugin <vladimir@pichug.in>
+import time
 import threading
 
 from utils import *

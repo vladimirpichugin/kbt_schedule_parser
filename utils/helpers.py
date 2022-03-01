@@ -4,9 +4,6 @@ import pathlib
 import os
 import logging
 import inspect
-import re
-import time
-import hashlib
 
 from settings import Settings
 

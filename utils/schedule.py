@@ -16,6 +16,7 @@ class CollegeScheduleGrabber:
         self.domain = domain
         self.blog_path = blog_path
         self.pattern_head = re.compile(r'^(?P<f>([А-Я]{1,2}))(\s)?(?P<n>[0-9]{2})([\s\-])?(?P<y>[0-9]{2})\s(?P<r>.+)?', flags=re.IGNORECASE)
+        self.pattern_time = re.compile(r'(?P<time>([0-1]?[0-9]|2[0-3]).[0-5][0-9])')
 
     def parse_articles(self) -> list:
         link = self.domain + self.blog_path
@@ -35,7 +36,7 @@ class CollegeScheduleGrabber:
                 href = item.get("href")
 
                 articles.append((text, href))
-            except Exception:
+            except:
                 logger.error(f'parse_articles: Исключение при обработке элемента из блога', exc_info=True)
 
         logger.debug(f'parse_articles: {articles}')
@@ -51,9 +52,9 @@ class CollegeScheduleGrabber:
 
         table_all = soup.find("div", class_="kris-post-item-txt").find_all("table")
 
-        times = []
+        bells = []
         for table_id, table in enumerate(table_all):
-            table_times = []
+            table_bells = []
             table_tbody = table.find("tbody")
             tr_all = table_tbody.find_all("tr")
 
@@ -62,22 +63,30 @@ class CollegeScheduleGrabber:
 
                 for c_r_i, rows in enumerate(td_all):
                     if c_r_i == 0 and tr_id == 0:
-                        for i in range(0, 5):
+                        for i in range(1, 5):
                             if len(tr_all) <= i:
                                 continue
 
-                            time_line_td = tr_all[i].find_all("td")
-                            time_line = time_line_td[c_r_i]
-                            time_line_text = time_line.text.replace(u'\xa0', '').replace('\n', '').strip()
+                            t_line_td = tr_all[i].find_all("td")
+                            t_line = t_line_td[c_r_i]
 
-                            if not time_line_text:
-                                continue
+                            t_line_str = t_line.text
+                            t_line_str = t_line_str.replace(u'\xa0', '')
+                            t_line_str = t_line_str.replace(u'\n', '')
+                            t_line_str = t_line_str.strip()
 
-                            if 'время' in time_line_text:
-                                continue
+                            if not re.search(self.pattern_time, t_line_str):
+                                t_line_str = None
 
-                            table_times.append(time_line_text)
-            times.append(table_times)
+                            if not t_line_str:
+                                t_line_str = None
+
+                            table_bells.append(t_line_str)
+
+            if not any(table_bells):
+                table_bells = []
+
+            bells.append(table_bells)
 
         schedule = []
         for table_id, table in enumerate(table_all):
@@ -117,7 +126,7 @@ class CollegeScheduleGrabber:
                                         'n': regex_head.group('n'),
                                         'y': regex_head.group('y')
                                     },
-                                    'time': times[table_id]
+                                    'time': bells[table_id]
                                 },
                                 'lessons': lessons
                             }
@@ -217,21 +226,6 @@ class CollegeScheduleAbc:
                 return article
 
         return None
-
-    @staticmethod
-    def get_weekday(next_day=False):
-        dt = datetime.datetime.today()
-
-        if dt.isoweekday() < 5 and (dt.hour >= 17 or next_day):
-            return dt + datetime.timedelta(days=1)
-
-        if dt.isoweekday() == 5 and (dt.hour >= 17 or next_day):
-            return dt + datetime.timedelta(days=-dt.weekday(), weeks=1)
-
-        if dt.isoweekday() > 5:
-            return dt + datetime.timedelta(days=-dt.weekday(), weeks=1)
-
-        return dt
 
     @staticmethod
     def find_room(info):

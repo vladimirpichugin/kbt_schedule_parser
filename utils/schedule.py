@@ -196,6 +196,7 @@ class CollegeScheduleAbc:
         parsed_articles = []
         for a_title, a_link in articles:
             try:
+                a_title = re.sub(' +', ' ', a_title).strip()
                 a_regex_date = re.search(pattern, a_title)
 
                 if not a_regex_date:

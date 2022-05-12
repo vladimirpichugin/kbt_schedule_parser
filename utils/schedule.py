@@ -191,12 +191,11 @@ class CollegeScheduleAbc:
     @staticmethod
     def get_articles(articles: list) -> list:
         pattern = re.compile('(?P<d>[0-9]{1,2})\s?(?P<m>[а-я]+)\s?(?P<y>[0-9]{4})\s?[г]?', flags=re.IGNORECASE)
-        months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+        months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
 
         parsed_articles = []
         for a_title, a_link in articles:
             try:
-                a_title = re.sub(' +', ' ', a_title).strip()
                 a_regex_date = re.search(pattern, a_title)
 
                 if not a_regex_date:
